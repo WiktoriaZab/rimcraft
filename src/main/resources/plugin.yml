@@ -1,0 +1,11 @@
+name: Rimcraft
+version: '${project.version}'
+main: me.smajt.rimcraft.Rimcraft
+api-version: 1.18
+depend:
+  - UltimateAdvancementAPI
+commands:
+  rrbook:
+    description: Random Randy's Book
+    usage: /<command>
+    permission: rimcraft.rrbook
