@@ -100,19 +100,19 @@ public class TemperatureChecks {
                         case LEATHER_HELMET:
                         case LEATHER_BOOTS:
                             if(playerBiome.getTargetBodyTemp() + 2 > playerTemp)
-                                tempUserData.setBodyTemp(playerTemp + 1);
+                                tempUserData.setBodyTemp(playerTemp + 0.5);
                             break;
                         case LEATHER_CHESTPLATE:
                             if(playerBiome.getTargetBodyTemp() + 2 > playerTemp)
-                                tempUserData.setBodyTemp(playerTemp + 2);
+                                tempUserData.setBodyTemp(playerTemp + 1.5);
                             break;
                         case LEATHER_LEGGINGS:
                             if(playerBiome.getTargetBodyTemp() + 2 > playerTemp)
-                                tempUserData.setBodyTemp(playerTemp + 1.5);
+                                tempUserData.setBodyTemp(playerTemp + 1);
                             break;
                         case IRON_HELMET:
                         case IRON_BOOTS:
-                            tempUserData.setBodyTemp(playerTemp - 0.8);
+                            tempUserData.setBodyTemp(playerTemp - 0.5);
                             break;
                         case IRON_LEGGINGS:
                             if(playerBiome.getTargetBodyTemp() - 2 < playerTemp)
@@ -183,7 +183,7 @@ public class TemperatureChecks {
             if(!RimAdvancements.veteran_2.isGranted(p))
                 RimAdvancements.veteran_2.grant(p, true);
             p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 2400, 2));
-            p.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 2400, 2));
+            p.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 2400, 1));
             p.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 2400, 1));
             p.damage(3);
         }
@@ -191,7 +191,7 @@ public class TemperatureChecks {
             if(!RimAdvancements.veteran_1.isGranted(p))
                 RimAdvancements.veteran_1.grant(p, true);
             p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 2400, 2));
-            p.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 2400, 2));
+            p.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 2400, 1));
             p.setFreezeTicks(2400);
             p.damage(1);
         }

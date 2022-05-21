@@ -28,8 +28,8 @@ public class AirDropScheduler extends BukkitRunnable {
         this.fallingBlock = fallingBlock;
     }
 
-    public static Material[] itemsDropRare = {Material.DIAMOND, Material.IRON_INGOT, Material.COAL, Material.EMERALD, Material.CARROT, Material.POTATO, Material.MELON_SEEDS, Material.ENDER_PEARL, Material.ENCHANTED_GOLDEN_APPLE, Material.CACTUS, Material.OBSIDIAN};
-    public static Material[] itemsDropCommon = {Material.IRON_INGOT, Material.COAL, Material.SPRUCE_LOG, Material.OAK_LOG, Material.DARK_OAK_LOG, Material.BIRCH_LOG, Material.JUNGLE_LOG, Material.ACACIA_LOG, Material.COBBLESTONE};
+    public static Material[] itemsDropRare = {Material.DIAMOND, Material.IRON_INGOT, Material.COAL, Material.EMERALD, Material.CARROT, Material.POTATO, Material.MELON_SEEDS, Material.ENDER_PEARL, Material.ENCHANTED_GOLDEN_APPLE, Material.CACTUS, Material.OBSIDIAN, Material.BLAZE_ROD, Material.NETHER_WART, Material.MAGMA_CREAM};
+    public static Material[] itemsDropCommon = {Material.COAL, Material.SPRUCE_LOG, Material.OAK_LOG, Material.DARK_OAK_LOG, Material.BIRCH_LOG, Material.JUNGLE_LOG, Material.ACACIA_LOG, Material.COBBLESTONE, Material.OXEYE_DAISY, Material.BROWN_MUSHROOM, Material.RED_MUSHROOM, Material.NETHER_WART};
 
     @Override
     public void run() {
@@ -74,7 +74,7 @@ public class AirDropScheduler extends BukkitRunnable {
                     indexList.add(randomIndex);
 
                     Material materialItem = itemsDropCommon[r.nextInt(itemsDropCommon.length)];
-                    chest.getBlockInventory().setItem(randomIndex, new ItemStack(materialItem, r.nextInt(48) + 1));
+                    chest.getBlockInventory().setItem(randomIndex, new ItemStack(materialItem, r.nextInt(28) + 1));
                 }
             }
 

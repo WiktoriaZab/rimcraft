@@ -104,7 +104,7 @@ public class GMFunctions {
         world.setFullTime(18000);
         world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
         world.setTicksPerSpawns(SpawnCategory.MONSTER, 1);
-        world.setSpawnLimit(SpawnCategory.MONSTER, 500);
+        world.setSpawnLimit(SpawnCategory.MONSTER, 300);
 
         BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
         scheduler.scheduleSyncDelayedTask(Rimcraft.getPlugin(), () -> {
@@ -131,7 +131,7 @@ public class GMFunctions {
         Location playerLocation = p.getLocation();
         EntityType randomEntity = randomEntities[r.nextInt(randomEntities.length)];
 
-        for (int i = 0; i < r.nextInt(10); i++){
+        for (int i = 0; i < r.nextInt(10) + 3; i++){
             Entity entity = world.spawnEntity(playerLocation, randomEntity);
             Objects.requireNonNull(((LivingEntity) entity).getEquipment()).setHelmet(new ItemStack(Material.LEATHER_HELMET));
         }
@@ -146,14 +146,19 @@ public class GMFunctions {
         Location playerLocation = p.getLocation();
         List<Entity> Entities = new ArrayList<>();
         Player target = null;
+        int mobAmount = 3;
 
-        for (int i = 0; i < r.nextInt(10) + 2; i++){
+        if(world.getFullTime() >= 720000){
+            Entity entity = world.spawnEntity(playerLocation, EntityType.EVOKER);
+            Entities.add(entity);
+            mobAmount += r.nextInt(10);
+        }
+
+        for (int i = 0; i < mobAmount; i++){
             EntityType randomEntity = raidEntities[r.nextInt(raidEntities.length)];
             Entity entity = world.spawnEntity(playerLocation, randomEntity);
             Entities.add(entity);
         }
-        Entity entity = world.spawnEntity(playerLocation, EntityType.EVOKER);
-        Entities.add(entity);
 
         for (Player player : Bukkit.getOnlinePlayers()){
             if (player.getWorld() == world && player.getGameMode() == GameMode.SURVIVAL && player.getLocation().distance(p.getLocation()) <= 48){
