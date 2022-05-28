@@ -236,7 +236,7 @@ public class GMFunctions {
     public static void PassionEvent(){
         PotionEffectType EffectType = PassionEffectTypes[r.nextInt(PassionEffectTypes.length)];
         for (Player p : Bukkit.getOnlinePlayers()){
-            p.addPotionEffect(new PotionEffect(EffectType, 300, 1));
+            p.addPotionEffect(new PotionEffect(EffectType, 3600, 1));
         }
 
         Rimcraft.getPlugin().GameSettingsUtil.getConfig().set("last-event", "Pasja");

@@ -58,7 +58,7 @@ public class RREventMenu  extends Menu {
             case CHEST:
                 GMFunctions.AirDropEvent(playerMenuUtility.getOwner());
                 break;
-            case FROSTED_ICE:
+            case BLUE_ICE:
                 GMFunctions.ColdWaveEvent();
                 break;
             case LAVA_BUCKET:
@@ -91,7 +91,7 @@ public class RREventMenu  extends Menu {
         inventory.setItem(6, raid);
         ItemStack airdrop = makeItem(Material.CHEST, ColorTranslator.translateColorCodes("&e&lKapsuła"));
         inventory.setItem(7, airdrop);
-        ItemStack coldwave = makeItem(Material.FROSTED_ICE, ColorTranslator.translateColorCodes("&e&lFala Chłodu"));
+        ItemStack coldwave = makeItem(Material.BLUE_ICE, ColorTranslator.translateColorCodes("&e&lFala Chłodu"));
         inventory.setItem(8, coldwave);
         ItemStack heatwave = makeItem(Material.LAVA_BUCKET, ColorTranslator.translateColorCodes("&e&lFala Ciepła"));
         inventory.setItem(9, heatwave);
