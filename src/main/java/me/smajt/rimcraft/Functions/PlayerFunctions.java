@@ -10,6 +10,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.*;
 import org.w3c.dom.Text;
 
@@ -18,6 +19,22 @@ import java.text.DecimalFormat;
 public class PlayerFunctions {
 
     private static final DecimalFormat df = new DecimalFormat("0.0");
+
+    public static void initPlayer(Player player){
+        User userData = UserStorageUtil.findUser(player.getUniqueId());
+        if(userData == null){
+            UserStorageUtil.createUser(player, 20);
+        }
+
+        TempUser tempUserData = TempUserStorageUtil.findUser(player.getUniqueId());
+        if (tempUserData == null)
+            TempUserStorageUtil.createUser(player);
+
+        PlayerFunctions.updateBoard(player);
+
+        BukkitScheduler scheduler = Rimcraft.getPlugin().getServer().getScheduler();
+        scheduler.scheduleSyncRepeatingTask(Rimcraft.getPlugin(), () -> PlayerFunctions.updateActionBar(player), 0L, 20L);
+    }
 
     public static void updateBoard(Player player){
         User userData = UserStorageUtil.findUser(player.getUniqueId());

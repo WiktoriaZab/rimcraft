@@ -4,9 +4,11 @@ import com.fren_gor.ultimateAdvancementAPI.advancement.BaseAdvancement;
 import jdk.javadoc.internal.doclint.HtmlTag;
 import me.smajt.rimcraft.Advancements.RimAdvancements;
 import me.smajt.rimcraft.Advancements.adv.Adventurer.Adventurer_1;
+import me.smajt.rimcraft.Models.Event;
 import me.smajt.rimcraft.Models.Plant;
 import me.smajt.rimcraft.Rimcraft;
 import me.smajt.rimcraft.Schedulers.AirDropScheduler;
+import me.smajt.rimcraft.Utils.EventsUtil;
 import me.smajt.rimcraft.Utils.PlantStorageUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
@@ -28,6 +30,12 @@ import java.util.Random;
 import java.util.logging.Level;
 
 public class GMFunctions {
+
+    public enum Events{
+        BLOODMOON,
+        HEATWAVE,
+        COLDWAVE
+    }
 
     private static final Random r = new Random();
     private static final EntityType[] randomEntities = {EntityType.EVOKER, EntityType.ZOMBIE, EntityType.HUSK, EntityType.SKELETON, EntityType.STRAY, EntityType.ZOMBIE, EntityType.CREEPER, EntityType.ZOMBIE, EntityType.PILLAGER, EntityType.RAVAGER, EntityType.SILVERFISH, EntityType.SLIME, EntityType.VINDICATOR, EntityType.WITCH, EntityType.BEE, EntityType.CAVE_SPIDER, EntityType.ENDERMAN, EntityType.GOAT, EntityType.IRON_GOLEM, EntityType.LLAMA, EntityType.PANDA, EntityType.POLAR_BEAR, EntityType.SPIDER, EntityType.WOLF, EntityType.BAT, EntityType.CAT, EntityType.CHICKEN, EntityType.OCELOT, EntityType.COW, EntityType.DONKEY, EntityType.FOX, EntityType.HORSE, EntityType.MUSHROOM_COW, EntityType.MULE, EntityType.PARROT, EntityType.PIG, EntityType.RABBIT, EntityType.SHEEP, EntityType.SKELETON_HORSE, EntityType.SNOWMAN, EntityType.TURTLE};
@@ -98,32 +106,35 @@ public class GMFunctions {
     }
 
     public static void BloodMoonEvent(Player p){
-        World world = p.getWorld();
-        Rimcraft.getPlugin().GameSettingsUtil.getConfig().set("blood-moon", true);
-        long beforeEventTime = world.getFullTime();
-        world.setFullTime(18000);
-        world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
-        world.setTicksPerSpawns(SpawnCategory.MONSTER, 1);
-        world.setSpawnLimit(SpawnCategory.MONSTER, 300);
+        if(EventsUtil.findEvent(Events.BLOODMOON) == null){
+            World world = p.getWorld();
+            EventsUtil.createEvent(Events.BLOODMOON);
+            long beforeEventTime = world.getFullTime();
+            world.setFullTime(18000);
+            world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+            world.setTicksPerSpawns(SpawnCategory.MONSTER, 1);
+            world.setSpawnLimit(SpawnCategory.MONSTER, 300);
 
-        BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
-        scheduler.scheduleSyncDelayedTask(Rimcraft.getPlugin(), () -> {
-            world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
-            world.setFullTime(beforeEventTime);
-            world.setTicksPerSpawns(SpawnCategory.MONSTER, 0);
-            world.setSpawnLimit(SpawnCategory.MONSTER, -1);
-            Rimcraft.getPlugin().GameSettingsUtil.getConfig().set("blood-moon", false);
+            BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+            scheduler.scheduleSyncDelayedTask(Rimcraft.getPlugin(), () -> {
+                world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
+                world.setFullTime(beforeEventTime);
+                world.setTicksPerSpawns(SpawnCategory.MONSTER, 0);
+                world.setSpawnLimit(SpawnCategory.MONSTER, -1);
 
-            for (Player player : Bukkit.getOnlinePlayers()){
-                if(player.getGameMode() == GameMode.SURVIVAL)
-                    if(!RimAdvancements.adventurer_1.isGranted(player))
-                        RimAdvancements.adventurer_1.grant(player, true);
-            }
-        }, 12000L);
+                EventsUtil.deleteEvent(Events.BLOODMOON);
 
-        Rimcraft.getPlugin().GameSettingsUtil.getConfig().set("last-event", "Blood Moon");
-        Bukkit.broadcast(Component.text(ChatColor.translateAlternateColorCodes('&', "&5&lRandom Event [Blood Moon]: &f&lKrew unosi się w powietrzu, czy to nasz koniec?")));
-        PlayerFunctions.updateAllPlayersBoard();
+                for (Player player : Bukkit.getOnlinePlayers()){
+                    if(player.getGameMode() == GameMode.SURVIVAL)
+                        if(!RimAdvancements.adventurer_1.isGranted(player))
+                            RimAdvancements.adventurer_1.grant(player, true);
+                }
+            }, 12000L);
+
+            Rimcraft.getPlugin().GameSettingsUtil.getConfig().set("last-event", "Blood Moon");
+            Bukkit.broadcast(Component.text(ChatColor.translateAlternateColorCodes('&', "&5&lRandom Event [Blood Moon]: &f&lKrew unosi się w powietrzu, czy to nasz koniec?")));
+            PlayerFunctions.updateAllPlayersBoard();
+        }
     }
 
     public static void RandomEntitiesEvent(Player p){
@@ -190,9 +201,52 @@ public class GMFunctions {
         PlayerFunctions.updateAllPlayersBoard();
     }
 
+    public static void HeatWaveEvent(){
+        if(EventsUtil.findEvent(Events.HEATWAVE) == null && EventsUtil.findEvent(Events.COLDWAVE) == null){
+            EventsUtil.createEvent(Events.HEATWAVE);
+
+            BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+            scheduler.scheduleSyncDelayedTask(Rimcraft.getPlugin(), () -> {
+                EventsUtil.deleteEvent(Events.HEATWAVE);
+            }, 6000L);
+
+            Rimcraft.getPlugin().GameSettingsUtil.getConfig().set("last-event", "Fala Ciepła");
+            Bukkit.broadcast(Component.text(ChatColor.translateAlternateColorCodes('&', "&5&lRandom Event [Fala Ciepła]: &f&lLato?? ... Nie ! Kataklizm Klimatyczny.")));
+            PlayerFunctions.updateAllPlayersBoard();
+        }
+    }
+
+    public static void ColdWaveEvent(){
+        if(EventsUtil.findEvent(Events.COLDWAVE) == null && EventsUtil.findEvent(Events.HEATWAVE) == null){
+            EventsUtil.createEvent(Events.COLDWAVE);
+
+            BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+            scheduler.scheduleSyncDelayedTask(Rimcraft.getPlugin(), () -> {
+                EventsUtil.deleteEvent(Events.COLDWAVE);
+            }, 6000L);
+
+            Rimcraft.getPlugin().GameSettingsUtil.getConfig().set("last-event", "Fala Chłodu");
+            Bukkit.broadcast(Component.text(ChatColor.translateAlternateColorCodes('&', "&5&lRandom Event [Fala Chłodu]: &f&lZima?? ... Nie ! Kataklizm Klimatyczny.")));
+            PlayerFunctions.updateAllPlayersBoard();
+        }
+    }
+
+    private static final PotionEffectType[] PassionEffectTypes = {PotionEffectType.DAMAGE_RESISTANCE, PotionEffectType.SPEED, PotionEffectType.FIRE_RESISTANCE, PotionEffectType.REGENERATION, PotionEffectType.INCREASE_DAMAGE, PotionEffectType.NIGHT_VISION, PotionEffectType.FAST_DIGGING};
+
+    public static void PassionEvent(){
+        PotionEffectType EffectType = PassionEffectTypes[r.nextInt(PassionEffectTypes.length)];
+        for (Player p : Bukkit.getOnlinePlayers()){
+            p.addPotionEffect(new PotionEffect(EffectType, 300, 1));
+        }
+
+        Rimcraft.getPlugin().GameSettingsUtil.getConfig().set("last-event", "Pasja");
+        Bukkit.broadcast(Component.text(ChatColor.translateAlternateColorCodes('&', "&5&lRandom Event [Pasja]: &f&lKolonia zdobywa pasję. Miejmy nadzieję, że się jej przyda.")));
+        PlayerFunctions.updateAllPlayersBoard();
+    }
+
     public static void ResetTheGame(Player p){
         World world = p.getWorld();
-        Rimcraft.getPlugin().GameSettingsUtil.getConfig().set("blood-moon", false);
+        EventsUtil.deleteAllEvents();
         world.setFullTime(24000);
         world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
         world.setTicksPerSpawns(SpawnCategory.MONSTER, 0);
@@ -206,7 +260,6 @@ public class GMFunctions {
                 adv.revoke(player);
             }
         }
-
 
         PlayerFunctions.updateAllPlayersBoard();
     }

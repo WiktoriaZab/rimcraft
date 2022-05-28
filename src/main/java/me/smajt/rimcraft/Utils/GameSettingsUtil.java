@@ -16,7 +16,6 @@ public class GameSettingsUtil{
 
     public GameSettingsUtil(Rimcraft plugin){
         this.plugin = plugin;
-        getConfig().addDefault("blood-moon", false);
         getConfig().addDefault("last-event", "Brak");
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();

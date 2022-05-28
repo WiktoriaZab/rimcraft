@@ -5,10 +5,7 @@ import me.smajt.rimcraft.Models.Biome;
 import me.smajt.rimcraft.Models.HeatSource;
 import me.smajt.rimcraft.Models.TempUser;
 import me.smajt.rimcraft.Models.User;
-import me.smajt.rimcraft.Utils.BiomesUtil;
-import me.smajt.rimcraft.Utils.HeatSourceStorageUtil;
-import me.smajt.rimcraft.Utils.TempUserStorageUtil;
-import me.smajt.rimcraft.Utils.UserStorageUtil;
+import me.smajt.rimcraft.Utils.*;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -19,6 +16,7 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Random;
 
 public class TemperatureChecks {
@@ -31,14 +29,22 @@ public class TemperatureChecks {
         if(tempUserData != null && p.getGameMode() != GameMode.CREATIVE && p.getGameMode() != GameMode.SPECTATOR){
             double playerTemp = tempUserData.getBodyTemp();
             Biome playerBiome = BiomesUtil.findBiome(p.getWorld().getBiome(p.getLocation()).name());
+            double targetBiomeTemp = Objects.requireNonNull(playerBiome).getTargetBodyTemp();
+
+            if(EventsUtil.findEvent(GMFunctions.Events.HEATWAVE) != null){
+                targetBiomeTemp += 3;
+            }
+            else if(EventsUtil.findEvent(GMFunctions.Events.COLDWAVE) != null){
+                targetBiomeTemp -= 3;
+            }
 
             double roznica = (0.4 + (0.8 - 0.4) * r.nextDouble());
             if (!p.getWorld().getName().endsWith("_nether") && !p.getWorld().getName().endsWith("_the_end")){
                 if (p.getWorld().getTime() > 12300){
-                    if (playerTemp > playerBiome.getTargetBodyTemp() - 2){
+                    if (playerTemp > targetBiomeTemp - 2){
                         tempUserData.setBodyTemp(playerTemp - roznica);
                     }
-                    else if (playerTemp < playerBiome.getTargetBodyTemp() - 2){
+                    else if (playerTemp < targetBiomeTemp - 2){
                         tempUserData.setBodyTemp(playerTemp + roznica);
                     }
                     else{
@@ -46,10 +52,10 @@ public class TemperatureChecks {
                     }
                 }
                 else{
-                    if (playerTemp > playerBiome.getTargetBodyTemp()){
+                    if (playerTemp > targetBiomeTemp){
                         tempUserData.setBodyTemp(playerTemp - roznica);
                     }
-                    else if (playerTemp < playerBiome.getTargetBodyTemp()){
+                    else if (playerTemp < targetBiomeTemp){
                         tempUserData.setBodyTemp(playerTemp + roznica);
                     }
                     else{
@@ -58,10 +64,10 @@ public class TemperatureChecks {
                 }
             }
             else{
-                if (playerTemp > playerBiome.getTargetBodyTemp()){
+                if (playerTemp > targetBiomeTemp){
                     tempUserData.setBodyTemp(playerTemp - roznica);
                 }
-                else if (playerTemp < playerBiome.getTargetBodyTemp()){
+                else if (playerTemp < targetBiomeTemp){
                     tempUserData.setBodyTemp(playerTemp + roznica);
                 }
                 else{
@@ -84,7 +90,7 @@ public class TemperatureChecks {
                 Block heatSourceBlock = p.getWorld().getBlockAt(heatSource.getX(), heatSource.getY(), heatSource.getZ());
                 if(p.getLocation().distance(heatSourceBlock.getLocation()) <= 5){
                     if (heatSourceBlock.getBlockData().getAsString().contains("lit=true")){
-                        if (playerTemp < playerBiome.getTargetBodyTemp() + 3)
+                        if (playerTemp < targetBiomeTemp + 3)
                             tempUserData.setBodyTemp(playerTemp + roznica);
                     }
                 }
@@ -95,42 +101,30 @@ public class TemperatureChecks {
 
 
             for (EquipmentSlot slot : slots){
-                if(p.getInventory().getItem(slot) != null){
-                    switch (p.getInventory().getItem(slot).getType()){
-                        case LEATHER_HELMET:
-                        case LEATHER_BOOTS:
-                            if(playerBiome.getTargetBodyTemp() + 2 > playerTemp)
-                                tempUserData.setBodyTemp(playerTemp + 0.5);
-                            break;
-                        case LEATHER_CHESTPLATE:
-                            if(playerBiome.getTargetBodyTemp() + 2 > playerTemp)
-                                tempUserData.setBodyTemp(playerTemp + 1.5);
-                            break;
-                        case LEATHER_LEGGINGS:
-                            if(playerBiome.getTargetBodyTemp() + 2 > playerTemp)
-                                tempUserData.setBodyTemp(playerTemp + 1);
-                            break;
-                        case IRON_HELMET:
-                        case IRON_BOOTS:
-                            tempUserData.setBodyTemp(playerTemp - 0.5);
-                            break;
-                        case IRON_LEGGINGS:
-                            if(playerBiome.getTargetBodyTemp() - 2 < playerTemp)
-                                tempUserData.setBodyTemp(playerTemp - 1);
-                        case IRON_CHESTPLATE:
-                            if(playerBiome.getTargetBodyTemp() - 2 < playerTemp)
-                                tempUserData.setBodyTemp(playerTemp - 1.5);
-                    }
+                switch (p.getInventory().getItem(slot).getType()){
+                    case LEATHER_HELMET:
+                    case LEATHER_BOOTS:
+                        if(playerBiome.getTargetBodyTemp() + 2 > playerTemp)
+                            tempUserData.setBodyTemp(playerTemp + 0.5);
+                        break;
+                    case LEATHER_CHESTPLATE:
+                        if(playerBiome.getTargetBodyTemp() + 2 > playerTemp)
+                            tempUserData.setBodyTemp(playerTemp + 1.5);
+                        break;
+                    case LEATHER_LEGGINGS:
+                        if(playerBiome.getTargetBodyTemp() + 2 > playerTemp)
+                            tempUserData.setBodyTemp(playerTemp + 1);
+                        break;
                 }
             }
 
             playerTemp = tempUserData.getBodyTemp();
             if(p.isInWater()){
-                if(playerBiome.getTargetBodyTemp() < 36){
+                if(targetBiomeTemp < 36){
                     roznica = (0.5 + (1.6 - 0.5) * r.nextDouble());
                     tempUserData.setBodyTemp(playerTemp - roznica);
                 }
-                else if (playerBiome.getTargetBodyTemp() >= 36){
+                else if (targetBiomeTemp >= 36){
                     roznica = (0.5 + (0.8 - 0.5) * r.nextDouble());
                     tempUserData.setBodyTemp(playerTemp - roznica);
                 }
@@ -138,11 +132,11 @@ public class TemperatureChecks {
 
             playerTemp = tempUserData.getBodyTemp();
             if(p.isInWater()){
-                if(playerBiome.getTargetBodyTemp() < 36){
+                if(targetBiomeTemp < 36){
                     roznica = (0.5 + (1.6 - 0.5) * r.nextDouble());
                     tempUserData.setBodyTemp(playerTemp - roznica);
                 }
-                else if (playerBiome.getTargetBodyTemp() >= 36){
+                else if (targetBiomeTemp >= 36){
                     roznica = (0.5 + (0.8 - 0.5) * r.nextDouble());
                     tempUserData.setBodyTemp(playerTemp - roznica);
                 }
@@ -151,21 +145,21 @@ public class TemperatureChecks {
             playerTemp = tempUserData.getBodyTemp();
             if(p.getWorld().hasStorm()){
                 if(p.getWorld().isThundering()){
-                    if(playerBiome.getTargetBodyTemp() < 36){
+                    if(targetBiomeTemp < 36){
                         roznica = (0.5 + (1.6 - 0.5) * r.nextDouble());
                         tempUserData.setBodyTemp(playerTemp - roznica);
                     }
-                    else if (playerBiome.getTargetBodyTemp() >= 36){
+                    else if (targetBiomeTemp >= 36){
                         roznica = (0.3 + (0.8 - 0.3) * r.nextDouble());
                         tempUserData.setBodyTemp(playerTemp - roznica);
                     }
                 }
                 else{
-                    if(playerBiome.getTargetBodyTemp() < 36){
+                    if(targetBiomeTemp < 36){
                         roznica = (0.5 + (1.2 - 0.5) * r.nextDouble());
                         tempUserData.setBodyTemp(playerTemp - roznica);
                     }
-                    else if (playerBiome.getTargetBodyTemp() >= 36){
+                    else if (targetBiomeTemp >= 36){
                         roznica = (0.3 + (0.8 - 0.3) * r.nextDouble());
                         tempUserData.setBodyTemp(playerTemp - roznica);
                     }
@@ -180,7 +174,7 @@ public class TemperatureChecks {
         TempUser tempUserData = TempUserStorageUtil.findUser(p.getUniqueId());
 
         if(tempUserData.getBodyTemp() > 40){
-            if(!RimAdvancements.veteran_2.isGranted(p))
+            if(!RimAdvancements.veteran_2.isGranted(p) && RimAdvancements.veteran_1.isGranted(p))
                 RimAdvancements.veteran_2.grant(p, true);
             p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 2400, 2));
             p.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 2400, 1));

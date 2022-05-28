@@ -3,6 +3,7 @@ package me.smajt.rimcraft;
 import com.fren_gor.ultimateAdvancementAPI.events.PlayerLoadingCompletedEvent;
 import me.kodysimpson.simpapi.menu.MenuManager;
 import me.smajt.rimcraft.Commands.RRBookCommand;
+import me.smajt.rimcraft.Functions.PlayerFunctions;
 import me.smajt.rimcraft.Models.TempUser;
 import me.smajt.rimcraft.Models.User;
 import me.smajt.rimcraft.Functions.TemperatureChecks;
@@ -35,8 +36,12 @@ public final class Rimcraft extends JavaPlugin {
         saveDefaultConfig();
         this.GameSettingsUtil = new GameSettingsUtil(this);
 
-        getServer().getPluginManager().registerEvents(new MyListener(), this);
+        for(Player p : getServer().getOnlinePlayers()){
+            PlayerFunctions.initPlayer(p);
+        }
 
+        getServer().getPluginManager().registerEvents(new MyListener(), this);
+        ItemManager.init();
 
         tab.registerAdvancements(root, allAdvancements);
         tab.getEventManager().register(tab, PlayerLoadingCompletedEvent.class, e ->{

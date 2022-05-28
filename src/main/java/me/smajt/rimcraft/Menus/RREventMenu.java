@@ -58,6 +58,15 @@ public class RREventMenu  extends Menu {
             case CHEST:
                 GMFunctions.AirDropEvent(playerMenuUtility.getOwner());
                 break;
+            case FROSTED_ICE:
+                GMFunctions.ColdWaveEvent();
+                break;
+            case LAVA_BUCKET:
+                GMFunctions.HeatWaveEvent();
+                break;
+            case SPLASH_POTION:
+                GMFunctions.PassionEvent();
+                break;
             case RED_STAINED_GLASS_PANE:
                 MenuManager.openMenu(RRMainMenu.class, playerMenuUtility.getOwner());
                 break;
@@ -82,6 +91,12 @@ public class RREventMenu  extends Menu {
         inventory.setItem(6, raid);
         ItemStack airdrop = makeItem(Material.CHEST, ColorTranslator.translateColorCodes("&e&lKapsuła"));
         inventory.setItem(7, airdrop);
+        ItemStack coldwave = makeItem(Material.FROSTED_ICE, ColorTranslator.translateColorCodes("&e&lFala Chłodu"));
+        inventory.setItem(8, coldwave);
+        ItemStack heatwave = makeItem(Material.LAVA_BUCKET, ColorTranslator.translateColorCodes("&e&lFala Ciepła"));
+        inventory.setItem(9, heatwave);
+        ItemStack passion = makeItem(Material.SPLASH_POTION, ColorTranslator.translateColorCodes("&e&lPasja"));
+        inventory.setItem(10, passion);
 
 
 

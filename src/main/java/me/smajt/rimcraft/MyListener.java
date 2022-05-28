@@ -1,20 +1,27 @@
 package me.smajt.rimcraft;
 
+import com.google.errorprone.annotations.Var;
 import me.kodysimpson.simpapi.exceptions.MenuManagerException;
 import me.kodysimpson.simpapi.exceptions.MenuManagerNotSetupException;
 import me.kodysimpson.simpapi.menu.MenuManager;
 import me.smajt.rimcraft.Advancements.RimAdvancements;
 import me.smajt.rimcraft.Commands.RRBookCommand;
+import me.smajt.rimcraft.Functions.GMFunctions;
 import me.smajt.rimcraft.Functions.PlayerFunctions;
 import me.smajt.rimcraft.Menus.RRMainMenu;
 import me.smajt.rimcraft.Models.*;
+import me.smajt.rimcraft.Schedulers.AirDropScheduler;
+import me.smajt.rimcraft.Schedulers.ItemCDScheduler;
 import me.smajt.rimcraft.Utils.*;
+import net.kyori.adventure.text.Component;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
@@ -27,29 +34,18 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.logging.Level;
 
 public class MyListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e){
-        Player player = e.getPlayer();
-        User userData = UserStorageUtil.findUser(player.getUniqueId());
-        if(userData == null){
-            UserStorageUtil.createUser(player, 20);
-        }
-
-        TempUser tempUserData = TempUserStorageUtil.findUser(player.getUniqueId());
-        if (tempUserData == null)
-            TempUserStorageUtil.createUser(player);
-
-        PlayerFunctions.updateBoard(player);
-
-        BukkitScheduler scheduler = Rimcraft.getPlugin().getServer().getScheduler();
-        scheduler.scheduleSyncRepeatingTask(Rimcraft.getPlugin(), () -> PlayerFunctions.updateActionBar(player), 0L, 20L);
+        PlayerFunctions.initPlayer(e.getPlayer());
     }
 
     @EventHandler
@@ -200,13 +196,13 @@ public class MyListener implements Listener {
 
     @EventHandler
     public void onEntitySpawn(EntitySpawnEvent e){
-        boolean isBloodMoon = Rimcraft.getPlugin().GameSettingsUtil.getConfig().getBoolean("blood-moon");
+        Event isBloodMoon = EventsUtil.findEvent(GMFunctions.Events.BLOODMOON);
         Entity entity = e.getEntity();
 
         if(entity instanceof Zombie)
             ((Zombie) entity).setCanBreakDoors(true);
 
-        if(isBloodMoon){
+        if(isBloodMoon != null){
             if(entity instanceof Monster){
                 switch (entity.getType()){
                     case ZOMBIE:
@@ -236,9 +232,53 @@ public class MyListener implements Listener {
     @EventHandler
     public void onInteract(PlayerInteractEvent e) throws MenuManagerException, MenuManagerNotSetupException {
         Player p = e.getPlayer();
-        if(e.getItem() != null)
-            if(Objects.requireNonNull(e.getItem()).getItemMeta().getPersistentDataContainer().has(RRBookCommand.rrBookKey))
+        if(e.getItem() != null){
+            if(Objects.requireNonNull(e.getItem()).getItemMeta().getPersistentDataContainer().has(RRBookCommand.rrBookKey)) {
                 MenuManager.openMenu(RRMainMenu.class, p);
+            }
+            if(e.getItem().getItemMeta().getPersistentDataContainer().has(ItemManager.BandageKey)){
+                ItemStack bandage = e.getItem();
+                if(e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK){
+                    if(ItemCDUtil.findCooldown(p, ItemManager.Bandage) == null){
+                        if(p.getHealth() < 20){
+                            e.getItem().setAmount(bandage.getAmount() - 1);
+
+                            if(p.getHealth() + 3 >= 20){
+                                p.setHealth(20);
+                            }
+                            else
+                            {
+                                p.setHealth(p.getHealth() + 3);
+                            }
+
+                            p.sendMessage(Component.text(ChatColor.translateAlternateColorCodes('&', "&a+ 3 HP")));
+                            BukkitTask task = new ItemCDScheduler(Rimcraft.getPlugin(), p, ItemManager.Bandage).runTaskLater(Rimcraft.getPlugin(), 60L);
+                        }
+                    }
+                }
+            }
+            else if(e.getItem().getItemMeta().getPersistentDataContainer().has(ItemManager.MedkitKey)){
+                ItemStack medkit = e.getItem();
+                if(e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK){
+                    if(ItemCDUtil.findCooldown(p, ItemManager.Medkit) == null){
+                        if(p.getHealth() < 20){
+                            e.getItem().setAmount(medkit.getAmount() - 1);
+
+                            if(p.getHealth() + 15 >= 20){
+                                p.setHealth(20);
+                            }
+                            else
+                            {
+                                p.setHealth(p.getHealth() + 15);
+                            }
+
+                            p.sendMessage(Component.text(ChatColor.translateAlternateColorCodes('&', "&a+ 15 HP")));
+                            BukkitTask task = new ItemCDScheduler(Rimcraft.getPlugin(), p, ItemManager.Medkit).runTaskLater(Rimcraft.getPlugin(), 600L);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @EventHandler
@@ -293,7 +333,7 @@ public class MyListener implements Listener {
                 int value = PlayerFunctions.getRandomInt(1, 3);
                 ItemStack iron = new ItemStack(Material.RAW_IRON, value);
                 player.getWorld().dropItemNaturally(block.getLocation(), iron);
-                if(!RimAdvancements.gather_3.isGranted(player))
+                if(!RimAdvancements.gather_3.isGranted(player) && RimAdvancements.gather_2.isGranted(player))
                     RimAdvancements.gather_3.incrementProgression(player, value);
             }
         }
