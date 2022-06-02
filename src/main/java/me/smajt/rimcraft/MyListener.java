@@ -209,7 +209,7 @@ public class MyListener implements Listener {
     }
 
     @EventHandler
-    public void tryingToMove(PlayerToggleSneakEvent e ){
+    public void sneakEvent(PlayerToggleSneakEvent e ){
         Player player = e.getPlayer();
         if(TempUserStorageUtil.findUser(e.getPlayer().getUniqueId()) != null){
             TempUser tempUser = TempUserStorageUtil.findUser(e.getPlayer().getUniqueId());
