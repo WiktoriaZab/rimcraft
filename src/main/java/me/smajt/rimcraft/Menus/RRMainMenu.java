@@ -40,6 +40,9 @@ public class RRMainMenu extends Menu {
             case MUSIC_DISC_FAR:
                 GMFunctions.ResetTheGame(playerMenuUtility.getOwner());
                 break;
+            case GOLDEN_APPLE:
+                MenuManager.openMenu(RRItemMenu.class, playerMenuUtility.getOwner());
+                break;
         }
     }
 
@@ -49,5 +52,7 @@ public class RRMainMenu extends Menu {
         inventory.setItem(3, eventMenu);
         ItemStack settingsMenu = makeItem(Material.MUSIC_DISC_FAR, ColorTranslator.translateColorCodes("&a&lZresetuj Gre"));
         inventory.setItem(4, settingsMenu);
+        ItemStack itemGiver = makeItem(Material.GOLDEN_APPLE, ColorTranslator.translateColorCodes("&d&lItem Giver"));
+        inventory.setItem(5, itemGiver);
     }
 }

@@ -5,6 +5,8 @@ import me.smajt.rimcraft.Models.User;
 import me.smajt.rimcraft.Rimcraft;
 import me.smajt.rimcraft.Utils.TempUserStorageUtil;
 import me.smajt.rimcraft.Utils.UserStorageUtil;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -94,12 +96,19 @@ public class PlayerFunctions {
             temperatura = "&1&l"+ df.format(tempUserData.getBodyTemp()) +" C";
         }
 
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', "PLH &7&l<-> " + temperatura + " &7&l<->&b&l ● ") + userData.getThirst()));
+        player.sendActionBar(Component.text(ChatColor.translateAlternateColorCodes('&', "PLH &7&l<-> " + temperatura + " &7&l<->&r \uEFF5 &b&l") + userData.getThirst()));
     }
 
     public static int getRandomInt(int a,int b) {
         int min = (int) Math.ceil(a);
         int max = (int) Math.floor(b);
         return (int) (Math.floor(Math.random() * (max - min)) + min);
+    }
+
+    public static void downPlayer(Player player){
+        player.showTitle(
+                Title.title(Component.text(ChatColor.translateAlternateColorCodes('&', "&c&lZostałeś powalony !")), Component.text("Poczekaj aż ktoś cię uratuje."))
+        );
+
     }
 }

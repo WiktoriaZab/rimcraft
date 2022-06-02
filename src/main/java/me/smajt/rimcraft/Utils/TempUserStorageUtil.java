@@ -15,7 +15,7 @@ public class TempUserStorageUtil {
     private static ArrayList<TempUser> tempUsers = new ArrayList<>();
 
     public static TempUser createUser(Player p){
-        TempUser user = new TempUser(p.getUniqueId(), 36.6);
+        TempUser user = new TempUser(p.getUniqueId(), 36.6, false);
         tempUsers.add(user);
 
         return user;

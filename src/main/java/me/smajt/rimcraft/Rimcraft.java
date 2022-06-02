@@ -32,13 +32,12 @@ public final class Rimcraft extends JavaPlugin {
     public void onEnable() {
         plugin = this;
 
+        getConfig().addDefault("resourceURL", "https://www.dropbox.com/s/p75ehq5gheqglxg/RimCraft.zip?dl=1");
+        getConfig().addDefault("resourceHash", "531888f8bd63802e6d00a8602f13251bc1c0040f");
+        getConfig().addDefault("resourceRequired", true);
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
         this.GameSettingsUtil = new GameSettingsUtil(this);
-
-        for(Player p : getServer().getOnlinePlayers()){
-            PlayerFunctions.initPlayer(p);
-        }
 
         getServer().getPluginManager().registerEvents(new MyListener(), this);
         ItemManager.init();
@@ -124,6 +123,10 @@ public final class Rimcraft extends JavaPlugin {
                 TemperatureChecks.refreshTemperature(p);
             }
         }, 0L, 240L);
+
+        for(Player p : getServer().getOnlinePlayers()){
+            PlayerFunctions.initPlayer(p);
+        }
     }
 
     @Override

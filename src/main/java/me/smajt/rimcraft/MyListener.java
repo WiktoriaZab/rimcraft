@@ -14,9 +14,11 @@ import me.smajt.rimcraft.Schedulers.AirDropScheduler;
 import me.smajt.rimcraft.Schedulers.ItemCDScheduler;
 import me.smajt.rimcraft.Utils.*;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -24,10 +26,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityChangeBlockEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.entity.*;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -37,15 +37,30 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.logging.Level;
 
 public class MyListener implements Listener {
 
+    FileConfiguration config = Rimcraft.getPlugin().getConfig();
+
     @EventHandler
     public void onJoin(PlayerJoinEvent e){
-        PlayerFunctions.initPlayer(e.getPlayer());
+        Player player = e.getPlayer();
+        if(!Objects.isNull(config.getString("resourceURL"))){
+            player.setResourcePack(Objects.requireNonNull(config.getString("resourceURL")), Objects.requireNonNull(config.getString("resourceHash")), config.getBoolean("resourceRequired"));
+        }
+        PlayerFunctions.initPlayer(player);
+    }
+
+    @EventHandler
+    public void onAcceptResource(PlayerResourcePackStatusEvent e){
+        Player player = e.getPlayer();
+        if(e.getStatus() == PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED || e.getStatus() == PlayerResourcePackStatusEvent.Status.FAILED_DOWNLOAD){
+            player.showTitle(Title.title(Component.text(ChatColor.translateAlternateColorCodes('&', "&7&l- &c&lRimCraft &7&l-")), Component.text("")));
+        }
     }
 
     @EventHandler
@@ -160,6 +175,61 @@ public class MyListener implements Listener {
     }
 
     @EventHandler
+    public void PreDeathEvent(PlayerDeathEvent e){
+        if(TempUserStorageUtil.findUser(e.getPlayer().getUniqueId()) != null){
+            e.setCancelled(true);
+            TempUser tempUser = TempUserStorageUtil.findUser(e.getPlayer().getUniqueId());
+            if(!tempUser.isDowned()){
+                tempUser.setDowned(true);
+                PlayerFunctions.downPlayer(e.getPlayer());
+            }
+        }
+    }
+
+    @EventHandler
+    public void onDamage(EntityDamageEvent e){
+        Entity entity = e.getEntity();
+        if (entity instanceof Player){
+            Player player = (Player) e.getEntity();
+            TempUser tempUser = TempUserStorageUtil.findUser(player.getUniqueId());
+            if (tempUser != null && tempUser.isDowned()) {
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void tryingToMove(PlayerMoveEvent e ){
+        if(TempUserStorageUtil.findUser(e.getPlayer().getUniqueId()) != null){
+            TempUser tempUser = TempUserStorageUtil.findUser(e.getPlayer().getUniqueId());
+            if(tempUser.isDowned()){
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void tryingToMove(PlayerToggleSneakEvent e ){
+        Player player = e.getPlayer();
+        if(TempUserStorageUtil.findUser(e.getPlayer().getUniqueId()) != null){
+            TempUser tempUser = TempUserStorageUtil.findUser(e.getPlayer().getUniqueId());
+            if(!tempUser.isDowned()){
+                for (Player p : Rimcraft.getPlugin().getServer().getOnlinePlayers()){
+                    TempUser tempUserDowned = TempUserStorageUtil.findUser(p.getUniqueId());
+                    if(tempUserDowned != null){
+                        if(p.getLocation().distance(player.getLocation()) < 5){
+                            if(tempUserDowned.isDowned()){
+                                tempUserDowned.setDowned(false);
+                                p.showTitle(Title.title(Component.text(ChatColor.translateAlternateColorCodes('&', "&a&lZostałeś uratowany !")), Component.text("Gratuluję.")));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @EventHandler
     public void onBlockDestroy(BlockBreakEvent e){
         Player player = e.getPlayer();
         Block block = e.getBlock();
@@ -232,6 +302,15 @@ public class MyListener implements Listener {
     @EventHandler
     public void onInteract(PlayerInteractEvent e) throws MenuManagerException, MenuManagerNotSetupException {
         Player p = e.getPlayer();
+
+        if(TempUserStorageUtil.findUser(e.getPlayer().getUniqueId()) != null){
+            TempUser tempUser = TempUserStorageUtil.findUser(e.getPlayer().getUniqueId());
+            if(tempUser.isDowned()){
+                e.setCancelled(true);
+                return;
+            }
+        }
+
         if(e.getItem() != null){
             if(Objects.requireNonNull(e.getItem()).getItemMeta().getPersistentDataContainer().has(RRBookCommand.rrBookKey)) {
                 MenuManager.openMenu(RRMainMenu.class, p);

@@ -1,12 +1,12 @@
 package me.smajt.rimcraft;
 
-import io.papermc.paper.chat.ChatRenderer;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -51,7 +51,6 @@ public class ItemManager {
     private static void createBandage(){
         ItemStack item = new ItemStack(Material.PAPER, 1);
         ItemStack minecraftPaper = new ItemStack(Material.PAPER);
-        ItemStack esencja = new ItemStack(Esencja_Roslinna);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text(ChatColor.translateAlternateColorCodes('&', "&c✚ Bandaż")));
         List<Component> lore = new ArrayList<>();
@@ -67,14 +66,12 @@ public class ItemManager {
           " E ", "PPP","   "
         );
         sr.setIngredient('P', minecraftPaper);
-        sr.setIngredient('E', esencja);
+        sr.setIngredient('E', new RecipeChoice.ExactChoice(Esencja_Roslinna));
         Bukkit.addRecipe(sr);
     }
 
     private static void createMedkit(){
         ItemStack item = new ItemStack(Material.PAPER, 1);
-        ItemStack bandage = new ItemStack(Bandage);
-        ItemStack esencja = new ItemStack(Esencja_Roslinna);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(Component.text(ChatColor.translateAlternateColorCodes('&', "&c✚ Apteczka")));
         List<Component> lore = new ArrayList<>();
@@ -83,14 +80,14 @@ public class ItemManager {
         meta.setCustomModelData(2);
         meta.getPersistentDataContainer().set(MedkitKey, PersistentDataType.INTEGER, 1);
         item.setItemMeta(meta);
-        Bandage = item;
+        Medkit = item;
 
         ShapedRecipe sr = new ShapedRecipe(NamespacedKey.minecraft("medkit"), item);
         sr.shape(
                 " E ", "PPP","   "
         );
-        sr.setIngredient('P', bandage);
-        sr.setIngredient('E', esencja);
+        sr.setIngredient('P',  new RecipeChoice.ExactChoice(Bandage));
+        sr.setIngredient('E',  new RecipeChoice.ExactChoice(Esencja_Roslinna));
         Bukkit.addRecipe(sr);
     }
 }

@@ -13,8 +13,10 @@ import me.smajt.rimcraft.Utils.PlantStorageUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.*;
+import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
@@ -50,7 +52,6 @@ public class GMFunctions {
                 plantBlock.breakNaturally();
             toDeletePlants.add(plant);
         }
-
         for (Plant plant : toDeletePlants){
             PlantStorageUtil.deletePlant(plant.getX(),plant.getY(),plant.getZ());
         }
